@@ -6,8 +6,6 @@
     <title>MR. TRADER VIP PRO ADVANCED (RGW)</title>
     <style>
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
-        
-        /* আপনার রঙিন জ্বলজ্বল করা আলোর কোড (সংশোধিত) */
         @keyframes colorBorderGlow {
             0% { border-color: #ff0000; box-shadow: 0 0 15px #ff0000; }
             20% { border-color: #00ff00; box-shadow: 0 0 15px #00ff00; }
@@ -16,25 +14,14 @@
             80% { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; }
             100% { border-color: #ff0000; box-shadow: 0 0 15px #ff0000; }
         }
-
         #lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999999999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        /* পাসওয়ার্ড স্ক্রিনের টাইটেলেও জ্বলজ্বল করা আলো */
         #lock-screen h2 { animation: colorBorderGlow 3s infinite linear; padding: 20px; border: 3px solid; border-radius: 50px; color: #fff; text-shadow: 0 0 5px #fff; }
-        
         #game-frame { width: 100vw; height: 100vh; border: none; display: block; }
-        
         .draggable { position: fixed; z-index: 999999; touch-action: none; cursor: move; }
-        
-        /* মেনু এবং ইনপুট বাটনে জ্বলজ্বল করা আলো */
         .btn-base { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 12px; border: 3px solid; animation: colorBorderGlow 3s infinite linear; cursor: pointer; user-select: none; text-shadow: 0 0 3px #fff; }
-        
         .sub-menu { position: absolute; display: none; flex-direction: column-reverse; gap: 5px; bottom: 80px; }
         .sub-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-weight: bold; cursor: pointer; color: white; font-size: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
-        
-        /* মেইন প্যানেলে জ্বলজ্বল করা আলো */
         #floating-panel { display: block; width: 200px; background: rgba(8, 10, 16, 0.95); border: 3px solid; animation: colorBorderGlow 3s infinite linear; border-radius: 15px; padding: 15px; color: white; }
-        
         .panel-title { text-align: center; color: #fff; font-size: 14px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 0 5px #00ffff; }
         #res-box { background:#000; text-align:center; border: 2px solid #fff; border-radius:8px; padding: 10px; margin: 10px 0; }
         #res { font-size: 25px; font-weight: 900; }
@@ -78,6 +65,9 @@
     </div>
 
     <script>
+        const defaultChart = ['B', 'S', 'B', 'B', 'S', 'S', 'B', 'S', 'B', 'S']; 
+        let defaultIndex = 0;
+
         function toggleSub(id) { const m = document.getElementById(id); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; }
         function checkPass() { if(document.getElementById('pass-input').value === "IRFAN157649") document.getElementById('lock-screen').style.display = 'none'; else alert("Wrong Password!"); }
         
@@ -104,22 +94,35 @@
         function updateStats() { document.getElementById('stats').innerText = `W: ${win} | L: ${loss} | T: ${historyStack.length}`; }
 
         function analyzeAndPredict() { 
-            let bAfterB = 0, sAfterB = 0, bAfterS = 0, sAfterS = 0;
-            for(let i=0; i<historyStack.length-1; i++) {
-                if(historyStack[i] === 'B') { if(historyStack[i+1] === 'B') bAfterB++; else sAfterB++; }
-                else { if(historyStack[i+1] === 'B') bAfterS++; else sAfterS++; }
-            }
-            let last = historyStack[historyStack.length-1];
-            let pred = (last === 'B') ? (bAfterB > sAfterB ? 'B' : 'S') : (bAfterS > sAfterS ? 'B' : 'S');
+            const resEl = document.getElementById('res');
             
-            const resEl = document.getElementById('res'); 
-            resEl.innerText = (pred === 'B') ? 'BIG' : 'SMALL'; 
-            resEl.style.color = (pred === 'B') ? '#00ff00' : '#ff0000';
+            if (historyStack.length < 5) {
+                let signal = defaultChart[defaultIndex];
+                resEl.innerText = (signal === 'B') ? 'BIG' : 'SMALL';
+                resEl.style.color = (signal === 'B') ? '#00ff00' : '#ff0000';
+                defaultIndex = (defaultIndex + 1) % defaultChart.length;
+                return;
+            }
+
+            let recentHistory = historyStack.slice(-5);
+            let bigCount = recentHistory.filter(x => x === 'B').length;
+            let smallCount = recentHistory.filter(x => x === 'S').length;
+            let prediction = "";
+            
+            if (bigCount > smallCount) prediction = "SMALL"; 
+            else if (smallCount > bigCount) prediction = "BIG";
+            else {
+                let last = historyStack[historyStack.length - 1];
+                prediction = (last === 'B') ? 'SMALL' : 'BIG';
+            }
+
+            resEl.innerText = prediction;
+            resEl.style.color = (prediction === 'BIG') ? '#00ff00' : '#ff0000';
         }
 
         function copyData() {
             let dataStr = JSON.stringify(historyStack);
-            navigator.clipboard.writeText(dataStr).then(() => { alert("ডাটা কপি হয়েছে! যেকোনো নোটপ্যাডে পেস্ট করে সেভ করুন।"); }).catch(() => { alert("কপি করতে সমস্যা হচ্ছে। ডাটা: " + dataStr); });
+            navigator.clipboard.writeText(dataStr).then(() => { alert("ডাটা কপি হয়েছে!"); });
         }
 
         setInterval(() => { let count = 30 - (Math.floor(Date.now() / 1000) % 30); document.getElementById('count').innerText = count; if (count === 30) analyzeAndPredict(); }, 1000);
