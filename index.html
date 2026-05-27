@@ -3,29 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <title>MR. TRADER VIP PRO ADVANCED (RGW)</title>
     <style>
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
-        @keyframes colorBorderGlow {
-            0% { border-color: #ff0000; box-shadow: 0 0 15px #ff0000; }
-            20% { border-color: #00ff00; box-shadow: 0 0 15px #00ff00; }
-            40% { border-color: #0000ff; box-shadow: 0 0 15px #0000ff; }
-            60% { border-color: #ffff00; box-shadow: 0 0 15px #ffff00; }
-            80% { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; }
-            100% { border-color: #ff0000; box-shadow: 0 0 15px #ff0000; }
-        }
+        @keyframes colorBorderGlow { 0% { border-color: #ff0000; box-shadow: 0 0 15px #ff0000; } 50% { border-color: #00ff00; box-shadow: 0 0 15px #00ff00; } 100% { border-color: #ff0000; box-shadow: 0 0 15px #ff0000; } }
         #lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999999999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #lock-screen h2 { animation: colorBorderGlow 3s infinite linear; padding: 20px; border: 3px solid; border-radius: 50px; color: #fff; text-shadow: 0 0 5px #fff; }
         #game-frame { width: 100vw; height: 100vh; border: none; display: block; }
         .draggable { position: fixed; z-index: 999999; touch-action: none; cursor: move; }
-        .btn-base { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 12px; border: 3px solid; animation: colorBorderGlow 3s infinite linear; cursor: pointer; user-select: none; text-shadow: 0 0 3px #fff; }
+        .btn-base { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 12px; border: 3px solid; animation: colorBorderGlow 3s infinite linear; cursor: pointer; user-select: none; }
         .sub-menu { position: absolute; display: none; flex-direction: column-reverse; gap: 5px; bottom: 80px; }
         .sub-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-weight: bold; cursor: pointer; color: white; font-size: 10px; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
         #floating-panel { display: block; width: 200px; background: rgba(8, 10, 16, 0.95); border: 3px solid; animation: colorBorderGlow 3s infinite linear; border-radius: 15px; padding: 15px; color: white; }
-        .panel-title { text-align: center; color: #fff; font-size: 14px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 0 5px #00ffff; }
+        .panel-title { text-align: center; color: #fff; font-size: 14px; font-weight: 900; margin-bottom: 8px; }
         #res-box { background:#000; text-align:center; border: 2px solid #fff; border-radius:8px; padding: 10px; margin: 10px 0; }
         #res { font-size: 25px; font-weight: 900; }
-        .stats-box { font-size: 10px; color: #fff; background: #222; padding: 5px; border-radius: 5px; text-align: center; border: 1px solid #444; }
+        .stats-box { font-size: 10px; color: #fff; background: #222; padding: 5px; border-radius: 5px; text-align: center; }
     </style>
 </head>
 <body>
@@ -35,7 +29,7 @@
         <button onclick="checkPass()" style="padding:12px 40px; border:none; background:linear-gradient(90deg, #7c3aed, #00ffff); color:white; font-weight:bold; border-radius:5px; cursor:pointer;">UNLOCK</button>
     </div>
     
-    <iframe id="game-frame" src="https://dkwin9.com/#/register?invitationCode=514421991352"></iframe>
+    <iframe id="game-frame" src="https://dkwin9.com/#/register?invitationCode=332151935695"></iframe>
     
     <div id="menu-container" class="draggable" style="bottom: 50px; left: 20px;">
         <div id="site-menu" class="sub-menu">
@@ -58,15 +52,33 @@
         <div id="floating-panel">
             <div class="panel-title">AI PRO ANALYZER</div>
             <div id="timer-box" style="text-align:center; font-size:12px; color:#ffcc00; font-weight:bold;">NEXT: <span id="count">30</span>s</div>
-            <div id="res-box"><div id="res">--</div></div>
-            <div class="stats-box" id="stats">W: 0 | L: 0 | T: 0</div>
-            <button onclick="copyData()" style="width:100%; margin-top:5px; font-size:8px;">COPY DATA TO CLIPBOARD</button>
+            <div id="res-box"><div id="res">ANALYZING...</div></div>
+            <div class="stats-box" id="stats">W: 0 | L: 0</div>
+            <button onclick="copyData()" style="width:100%; margin-top:5px; font-size:8px;">COPY DATA</button>
         </div>
     </div>
 
     <script>
-        const defaultChart = ['B', 'S', 'B', 'B', 'S', 'S', 'B', 'S', 'B', 'S']; 
-        let defaultIndex = 0;
+        const model = tf.sequential();
+        model.add(tf.layers.dense({units: 16, inputShape: [5], activation: 'relu'}));
+        model.add(tf.layers.dense({units: 8, activation: 'relu'}));
+        model.add(tf.layers.dense({units: 1, activation: 'sigmoid'}));
+        model.compile({optimizer: 'adam', loss: 'binaryCrossentropy'});
+
+        const trainingData = ["SMALL","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","BIG","BIG","SMALL","BIG","SMALL","BIG","BIG","SMALL","BIG","SMALL","BIG","SMALL","SMALL","SMALL","BIG","SMALL","BIG","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","SMALL","BIG","SMALL","BIG","SMALL","SMALL","BIG","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","SMALL","BIG","BIG","BIG","SMALL","BIG","BIG","BIG","BIG","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","SMALL","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","BIG","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","BIG","SMALL","BIG","BIG","BIG","SMALL","BIG","SMALL","BIG","BIG","BIG","SMALL","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","BIG","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","BIG","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","BIG","SMALL","SMALL","BIG","BIG","SMALL","BIG","SMALL","SMALL","SMALL","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","BIG","SMALL","BIG","BIG","SMALL","BIG","SMALL","BIG","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","BIG","BIG","SMALL","SMALL","BIG","SMALL","BIG","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","BIG","BIG","SMALL","BIG","BIG","BIG","SMALL","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","BIG","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","BIG","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","BIG","SMALL","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","BIG","BIG","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","BIG","BIG","BIG","BIG","SMALL","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","BIG","BIG","BIG","SMALL","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","SMALL","BIG","BIG","BIG","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","SMALL","BIG","BIG","BIG","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","SMALL","BIG","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","BIG","BIG","BIG","SMALL","SMALL","BIG","BIG","SMALL","BIG","BIG","BIG","BIG","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","BIG","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","SMALL","BIG","BIG","SMALL","BIG","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","BIG","SMALL","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","BIG","SMALL","BIG","SMALL","BIG","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","SMALL","BIG","SMALL","SMALL","BIG","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","BIG","SMALL","BIG","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","SMALL","SMALL","SMALL","SMALL","BIG","BIG","BIG","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","BIG","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","BIG","SMALL","BIG","BIG","SMALL","BIG","BIG","SMALL","BIG","SMALL","SMALL","BIG","BIG","BIG","SMALL","BIG","BIG","BIG","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","SMALL","BIG","SMALL","BIG","BIG","SMALL","BIG","BIG","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","BIG","SMALL","SMALL","BIG","BIG","SMALL","BIG","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","BIG","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","BIG","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","BIG","BIG","BIG","BIG","BIG","SMALL","SMALL","SMALL","BIG","BIG","SMALL","BIG","SMALL","BIG","BIG","SMALL","SMALL","BIG","BIG","BIG","SMALL","BIG","SMALL","BIG","SMALL","BIG","BIG","BIG","BIG","SMALL","BIG","BIG","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","BIG","SMALL","BIG","BIG","BIG","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","BIG","SMALL","SMALL","SMALL","BIG","BIG","BIG","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","BIG","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","SMALL","BIG","SMALL","BIG","BIG"];
+
+        async function initTraining() {
+            let inputs = [], targets = [];
+            for (let i = 0; i < trainingData.length - 5; i++) {
+                inputs.push(trainingData.slice(i, i + 5).map(x => x === 'B' ? 1 : 0));
+                targets.push([trainingData[i + 5] === 'B' ? 1 : 0]);
+            }
+            await model.fit(tf.tensor2d(inputs), tf.tensor2d(targets), {epochs: 3, batchSize: 32});
+        }
+        initTraining();
+
+        let historyStack = JSON.parse(localStorage.getItem('gameHistory')) || [];
+        let win = parseInt(localStorage.getItem('win')) || 0, loss = parseInt(localStorage.getItem('loss')) || 0;
 
         function toggleSub(id) { const m = document.getElementById(id); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; }
         function checkPass() { if(document.getElementById('pass-input').value === "IRFAN157649") document.getElementById('lock-screen').style.display = 'none'; else alert("Wrong Password!"); }
@@ -79,54 +91,45 @@
         }
         document.querySelectorAll('.draggable').forEach(makeDraggable);
 
-        let historyStack = JSON.parse(localStorage.getItem('gameHistory')) || [];
-        let win = parseInt(localStorage.getItem('win')) || 0, loss = parseInt(localStorage.getItem('loss')) || 0;
-
-        function registerResult(val) { 
-            if(historyStack.length > 0) { if(val === (Math.random() > 0.5 ? 'B' : 'S')) win++; else loss++; } 
+        async function registerResult(val) { 
             historyStack.push(val); 
-            if(historyStack.length > 5000) historyStack.shift(); 
+            if(historyStack.length > 50) historyStack.shift(); 
             localStorage.setItem('gameHistory', JSON.stringify(historyStack)); 
-            localStorage.setItem('win', win); localStorage.setItem('loss', loss); 
             updateStats(); 
         }
 
-        function updateStats() { document.getElementById('stats').innerText = `W: ${win} | L: ${loss} | T: ${historyStack.length}`; }
+        function updateStats() { document.getElementById('stats').innerText = `W: ${win} | L: ${loss}`; }
 
-        function analyzeAndPredict() { 
+        // অটোমেটিক এনালাইসিস ইঞ্জিন
+        async function analyzeAndPredict() {
             const resEl = document.getElementById('res');
-            
             if (historyStack.length < 5) {
-                let signal = defaultChart[defaultIndex];
-                resEl.innerText = (signal === 'B') ? 'BIG' : 'SMALL';
-                resEl.style.color = (signal === 'B') ? '#00ff00' : '#ff0000';
-                defaultIndex = (defaultIndex + 1) % defaultChart.length;
-                return;
-            }
+                resEl.innerText = "AUTO ANALYZING...";
+            } else {
+                const inputData = historyStack.slice(-5).map(x => x === 'B' ? 1 : 0);
+                const prediction = model.predict(tf.tensor2d([inputData]));
+                let score = (await prediction.data())[0];
+                
+                // অটোমেটিক প্যাটার্ন শিফটার: যদি ৩ বারের বেশি একই রেজাল্ট আসে, সিগনাল রেন্ডমাইজ হবে
+                let count = 0;
+                for(let i = historyStack.length - 1; i >= 0; i--) { if(historyStack[i] === historyStack[historyStack.length-1]) count++; else break; }
+                if(count >= 3) score = Math.random(); 
 
-            let recentHistory = historyStack.slice(-5);
-            let bigCount = recentHistory.filter(x => x === 'B').length;
-            let smallCount = recentHistory.filter(x => x === 'S').length;
-            let prediction = "";
-            
-            if (bigCount > smallCount) prediction = "SMALL"; 
-            else if (smallCount > bigCount) prediction = "BIG";
-            else {
-                let last = historyStack[historyStack.length - 1];
-                prediction = (last === 'B') ? 'SMALL' : 'BIG';
+                let result = score > 0.5 ? 'BIG' : 'SMALL';
+                resEl.innerText = result;
+                resEl.style.color = (result === 'BIG') ? '#00ff00' : '#ff0000';
             }
-
-            resEl.innerText = prediction;
-            resEl.style.color = (prediction === 'BIG') ? '#00ff00' : '#ff0000';
         }
 
-        function copyData() {
-            let dataStr = JSON.stringify(historyStack);
-            navigator.clipboard.writeText(dataStr).then(() => { alert("ডাটা কপি হয়েছে!"); });
-        }
+        function copyData() { navigator.clipboard.writeText(JSON.stringify(historyStack)); alert("Data Copied!"); }
 
-        setInterval(() => { let count = 30 - (Math.floor(Date.now() / 1000) % 30); document.getElementById('count').innerText = count; if (count === 30) analyzeAndPredict(); }, 1000);
-        function changeSite(i) { document.getElementById('game-frame').src = ["https://dkwin9.com/#/register?invitationCode=332151935695", "https://hgnice0.com/#/register?invitationCode=682521867456", "https://13bdwin24.com/register?inviteCode=TBM3HGN&from=web"][i]; }
+        setInterval(() => { 
+            let count = 30 - (Math.floor(Date.now() / 1000) % 30); 
+            document.getElementById('count').innerText = count; 
+            if (count === 30) analyzeAndPredict(); 
+        }, 1000);
+
+        function changeSite(i) { document.getElementById('game-frame').src = ["https://dkwin9.com/#/register?invitationCode=332151935695", "https://hgnice0.com/#/register?alg=682521867456", "https://13bdwin24.com/register?inviteCode=TBM3HGN&from=web"][i]; }
         updateStats();
     </script>
 </body>
